@@ -1,15 +1,14 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-// Create Context
 export const TabsContext = createContext();
 
-// Create Provider
 export const TabsProvider = ({ children }) => {
   const [savedTabsData, setSavedTabsData] = useState([]);
   const [savedSettingsData, setSavedSettingsData] = useState([]);
+  const [gridOrder, setGridOrder] = useState([]);
+  const [selectedGridItem, setSelectedGridItem] = useState(null);
 
-  // Fetch saved tabs from server
   const fetchSavedTabsData = async () => {
     try {
       const response = await axios.get(
@@ -31,7 +30,6 @@ export const TabsProvider = ({ children }) => {
     }
   };
 
-  // Fetch saved settings from server
   const fetchSavedSettings = async () => {
     try {
       const response = await axios.get(
@@ -50,53 +48,70 @@ export const TabsProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    fetchSavedTabsData();
-    fetchSavedSettings();
-  }, []);
-
-  // Method to handle adding a new tab to the server
   const handleAddTabToServer = async (newLink) => {
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_SERVER}/api/tab`,
         newLink,
       );
-      const savedData = response.data;
-      console.log(savedData);
+      console.log('Response: ', response);
       fetchSavedTabsData();
     } catch (error) {
       console.error(error);
     }
   };
 
-  // Method to save changes in settings to the server
   const saveSettingsChangesToServer = async (newSetting) => {
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_SERVER}/api/settings`,
         newSetting,
       );
-      console.log(response.data);
-      const savedSettings = response.data;
-      console.log(savedSettings);
+      console.log('Response: ', response);
       fetchSavedSettings();
     } catch (error) {
       console.error(error);
     }
   };
+
+  const handleSelectGridItem = (type) => {
+    setSelectedGridItem(type);
+  };
+
+  const handleClose = () => {
+    setSelectedGridItem(null);
+    handleSelectGridItem(null);
+  };
+
+  useEffect(() => {
+    fetchSavedTabsData();
+    fetchSavedSettings();
+  }, []);
+
+  useEffect(() => {
+    setGridOrder([
+      // Here, you can also put default items if you wish.
+      ...savedTabsData.map((tab, index) => ({
+        type: 'tab',
+        backgroundImage: `url(${tab?.imgUrl})`,
+        label: tab.name,
+        tab,
+      })),
+    ]);
+  }, [savedTabsData]);
+
   const value = {
     savedTabsData,
     savedSettingsData,
     handleAddTabToServer,
     saveSettingsChangesToServer,
+    gridOrder,
+    setGridOrder,
+    selectedGridItem,
+    setSelectedGridItem,
+    handleSelectGridItem,
+    handleClose,
   };
-
-  useEffect(() => {
-    console.log('TABS CONTEXT:', {
-      value,
-    });
-  }, [value]);
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>;
 };

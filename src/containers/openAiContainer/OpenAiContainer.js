@@ -16,7 +16,11 @@ import { useDebounce } from 'use-debounce';
 import axios from 'axios';
 import { useEffect } from 'react';
 
-function ChatGPT({ selectedGridItem, setSelectedGridItem }) {
+function ChatGPT({
+  selectedGridItem,
+  setSelectedGridItem,
+  handleSelectGridItem,
+}) {
   const [query, setQuery] = useState('');
   const [debouncedQuery] = useDebounce(query, 500);
   const [isLoading, setIsLoading] = useState(false);
@@ -124,7 +128,8 @@ function ChatGPT({ selectedGridItem, setSelectedGridItem }) {
 
   const handleClose = (e) => {
     e.stopPropagation();
-    setSelectedGridItem(null);
+    setSelectedGridItem(null); // Explicitly setting to null to reapply nonExpandedStyle
+    handleSelectGridItem(null);
   };
   console.log(savedResponses);
   return (

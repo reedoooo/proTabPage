@@ -13,7 +13,12 @@ import {
   VStack,
 } from '@chakra-ui/react';
 
-function BlogContainer({ selectedGridItem, setSelectedGridItem, label }) {
+function BlogContainer({
+  selectedGridItem,
+  setSelectedGridItem,
+  label,
+  handleSelectGridItem,
+}) {
   console.log('BLOG GIS:', selectedGridItem);
   const subtleBgColor = useColorModeValue('gray.50', 'gray.900'); // Adjust these values for your color scheme
 
@@ -36,7 +41,8 @@ function BlogContainer({ selectedGridItem, setSelectedGridItem, label }) {
 
   const handleClose = (e) => {
     e.stopPropagation();
-    setSelectedGridItem(null);
+    setSelectedGridItem(null); // Explicitly setting to null to reapply nonExpandedStyle
+    handleSelectGridItem(null);
   };
 
   return (

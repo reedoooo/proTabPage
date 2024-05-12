@@ -14,7 +14,12 @@ import TaskAccordion from '../../components/todolist/TaskAccordion';
 import UpdateTask from '../../components/todolist/UpdateTask';
 import { useToDoList } from '../../context/Todo/todoListContext';
 
-function ToDoListContainer({ selectedGridItem, setSelectedGridItem, label }) {
+function ToDoListContainer({
+  selectedGridItem,
+  setSelectedGridItem,
+  handleSelectGridItem,
+  label,
+}) {
   console.log('ToDoListContainer selectedGridItem:', selectedGridItem);
 
   const {
@@ -65,6 +70,7 @@ function ToDoListContainer({ selectedGridItem, setSelectedGridItem, label }) {
   const handleClose = (e) => {
     e.stopPropagation();
     setSelectedGridItem(null); // Explicitly setting to null to reapply nonExpandedStyle
+    handleSelectGridItem(null);
   };
 
   const totalPages = Math.ceil(savedTasks.length / tasksPerPage);

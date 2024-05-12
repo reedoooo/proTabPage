@@ -12,7 +12,13 @@ import Collections from '../../components/cardPriceTracker/Collections';
 import PriceTracker from '../../components/cardPriceTracker/PriceTracker';
 import Wishlist from '../../components/cardPriceTracker/WishList';
 
-const CardPriceTracker = ({ selectedGridItem, setSelectedGridItem, label }) => {
+const CardPriceTracker = ({
+  selectedGridItem,
+  setSelectedGridItem,
+  label,
+  handleSelectGridItem,
+}) => {
+  console.log('CARD GIS:', selectedGridItem);
   const [activeTab, setActiveTab] = useState('portfolio'); // initial tab
   const headingSize = useBreakpointValue({ base: 'sm', md: 'lg' });
   const bgColor = useColorModeValue('green.400', 'green.700');
@@ -27,7 +33,8 @@ const CardPriceTracker = ({ selectedGridItem, setSelectedGridItem, label }) => {
 
   const handleClose = (e) => {
     e.stopPropagation();
-    setSelectedGridItem(null);
+    setSelectedGridItem(null); // Explicitly setting to null to reapply nonExpandedStyle
+    handleSelectGridItem(null);
   };
 
   const tabContent = () => {

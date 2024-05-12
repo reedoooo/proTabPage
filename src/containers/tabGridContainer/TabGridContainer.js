@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Box, Grid, VStack, useBreakpointValue } from '@chakra-ui/react';
 import ToDoListContainer from '../todolistContainer/ToDoListContainer';
 import NotesContainer from '../notesContainer/NotesContainer';
@@ -8,9 +8,14 @@ import HabitTrackerContainer from '../habitTracker/HabitTrackerContainer';
 import CardPriceTracker from '../cardPriceTracker.js/CardPriceTracker';
 import CustomGridItem from './CustomGridItem';
 import Tab from '../../components/tab/Tab';
+import { TabsContext } from '../../context/Tabs/tabsContext';
 
-const TabGridContainer = ({ savedTabsData }) => {
+const TabGridContainer = () => {
+  const { savedTabsData, handleClose, handleSelectGridItem } =
+    useContext(TabsContext);
   const [selectedGridItem, setSelectedGridItem] = useState(null);
+  const initialState = []; // or whatever your initial state is
+  const [gridOrder, setGridOrder] = useState(initialState);
 
   const defaultGridItems = [
     { type: 'todo', bgColor: '#276749', label: 'TODO LIST' },
@@ -27,19 +32,13 @@ const TabGridContainer = ({ savedTabsData }) => {
     md: 'repeat(6, 1fr)',
   });
 
+  const numColumns = useBreakpointValue({
+    base: 1,
+    sm: 4,
+    md: 6,
+  });
+
   const breakpoint = useBreakpointValue({ base: 'base', sm: 'sm', md: 'md' });
-
-  const [gridOrder, setGridOrder] = useState([
-    ...defaultGridItems,
-    ...savedTabsData.map((tab, index) => ({
-      type: 'tab',
-      backgroundImage: `url(${tab?.imgUrl})`,
-      label: tab.name,
-      tab,
-    })),
-  ]);
-
-  console.log('tab:', gridOrder);
 
   useEffect(() => {
     setGridOrder([
@@ -51,7 +50,7 @@ const TabGridContainer = ({ savedTabsData }) => {
         tab,
       })),
     ]);
-  }, [savedTabsData]);
+  }, [savedTabsData, setGridOrder]);
 
   const getContainerComponent = (type, index) => {
     const containerTypeMapping = {
@@ -67,6 +66,55 @@ const TabGridContainer = ({ savedTabsData }) => {
     return containerTypeMapping[type] || Tab;
   };
 
+  const renderGridItems = () => {
+    const columnItems = [];
+
+    gridOrder.forEach((item, index) => {
+      const columnIndex = index % numColumns; // use variable instead of hardcoded 4
+      const selectedColumnIndex = selectedGridItem
+        ? gridOrder.findIndex(
+            (gridItem) => gridItem.type === selectedGridItem,
+          ) % numColumns // use variable instead of hardcoded 4
+        : null;
+
+      if (selectedGridItem) {
+        if (columnIndex === selectedColumnIndex) {
+          if (item.type === selectedGridItem) {
+            columnItems.push(item);
+          } else {
+            columnItems.push(null);
+          }
+        } else {
+          columnItems.push(item); // Keep item in other columns
+        }
+      } else {
+        columnItems.push(item);
+      }
+    });
+
+    return columnItems.map((item, index) => {
+      if (!item) return null;
+
+      return (
+        <CustomGridItem
+          key={index}
+          label={item.label}
+          type={item.type}
+          selectedGridItem={selectedGridItem}
+          setSelectedGridItem={setSelectedGridItem}
+          handleSelectGridItem={handleSelectGridItem}
+          handleClose={handleClose}
+          breakpoint={breakpoint}
+          gridOrder={gridOrder}
+          ContainerComponent={getContainerComponent(item.type, index)}
+          bgColor={item.type === 'tab' ? null : item.bgColor}
+          bgImage={item.type === 'tab' ? item.backgroundImage : null}
+          tab={item.tab}
+        />
+      );
+    });
+  };
+
   return (
     <VStack spacing={4} align="stretch" w="100%">
       <Box
@@ -75,39 +123,26 @@ const TabGridContainer = ({ savedTabsData }) => {
         display="flex"
         padding={4}
         marginTop={10}
+        alignItems="center"
+        justifyContent="center" // Center the grid horizontally
       >
         <Box
-          maxWidth="100vw"
+          maxWidth="1280px" // Max-width for your grid
+          width="100%" // Make it responsive
           maxHeight="100vh"
-          minWidth="100%"
           minHeight="100%"
           position="relative"
+          marginX="auto" // Center the container horizontally
+          paddingX={breakpoint === 'base' ? '0' : '1rem'} // Sides padding
         >
           <Grid
             gap={4}
             padding={4}
             border="5px solid black"
-            width="100%"
+            width="100%" // Make it responsive
             templateColumns={templateColumns}
-            flexGrow={'1'}
           >
-            {gridOrder.map((item, index) => (
-              <CustomGridItem
-                className="custom-grid-item"
-                flexGrow={'1'}
-                key={index}
-                label={item.label}
-                type={item.type}
-                selectedGridItem={selectedGridItem}
-                setSelectedGridItem={setSelectedGridItem}
-                breakpoint={breakpoint}
-                gridOrder={gridOrder}
-                ContainerComponent={getContainerComponent(item.type, index)}
-                bgColor={item.type === 'tab' ? null : item.bgColor} // Pass null if type is 'tab'
-                bgImage={item.type === 'tab' ? item.backgroundImage : null} // Pass null if type is 'tab'
-                tab={item.tab} // Pass the tab object for further use
-              />
-            ))}
+            {renderGridItems()}
           </Grid>
         </Box>
       </Box>

@@ -10,7 +10,12 @@ import {
 } from '@chakra-ui/react';
 import { useNotes } from '../../context/Notes/notesContext';
 
-function NotesContainer({ selectedGridItem, isVisible, setSelectedGridItem }) {
+function NotesContainer({
+  selectedGridItem,
+  isVisible,
+  setSelectedGridItem,
+  handleSelectGridItem,
+}) {
   const {
     note,
     setNote,
@@ -56,6 +61,7 @@ function NotesContainer({ selectedGridItem, isVisible, setSelectedGridItem }) {
   const handleClose = (e) => {
     e.stopPropagation();
     setSelectedGridItem(null); // Explicitly setting to null to reapply nonExpandedStyle
+    handleSelectGridItem(null);
   };
 
   return (
